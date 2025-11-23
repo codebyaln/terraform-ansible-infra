@@ -3,10 +3,9 @@ terraform {
 
   backend "s3" {
     bucket         = "terraform-state-bucket"
-    key            = "k8s/infra.tfstate"
+    key            = "k8s-infra/terraform.tfstate"
     region         = "ap-south-1"
-    dynamodb_table = "terraform-locks"
-    encrypt        = true
+    use_lockfile  = true
   }
 }
 

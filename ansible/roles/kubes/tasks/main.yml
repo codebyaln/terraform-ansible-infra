@@ -1,0 +1,76 @@
+
+- name: Disable swap
+  ansible.builtin.command: swapoff -a
+  ignore_errors: true
+
+- name: Remove swap from fstab
+  replace:
+    path: /etc/fstab
+    regexp: '(^.*swap.*$)'
+    replace: ''
+
+- name: Install containerd dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ca-certificates
+    - curl
+    - gnupg
+
+- name: Add Docker (containerd) GPG
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add containerd repo apt source
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    state: present
+
+- name: Install containerd
+  apt:
+    name: containerd
+    state: present
+    update_cache: yes
+
+- name: Configure containerd default config
+  command: |
+    mkdir -p /etc/containerd
+    containerd config default > /etc/containerd/config.toml
+  args:
+    creates: /etc/containerd/config.toml
+
+- name: Restart containerd
+  service:
+    name: containerd
+    state: restarted
+    enabled: true
+
+- name: Add Kubernetes apt key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add kubernetes apt repository
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+
+- name: Install kubelet kubeadm kubectl
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Hold kube packages
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    mark_hold: yes
