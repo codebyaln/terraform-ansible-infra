@@ -1,35 +1,84 @@
-resource "aws_vpc" "main" {
-  cidr_block = var.vpc_cidr
-  tags = { Name = "k8s-vpc" }
+
+provider "aws" {
+  region = var.region
 }
+
+#####################
+# VPC
+#####################
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "k8s-vpc"
+  }
+}
+
+#####################
+# SUBNETS
+#####################
+
+# Public Subnet
+resource "aws_subnet" "public_subnet" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "${var.region}a"
+
+  tags = {
+    Name = "k8s-public-subnet"
+  }
+}
+
+# Private Subnet
+resource "aws_subnet" "private_subnet" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "${var.region}a"
+
+  tags = {
+    Name = "k8s-private-subnet"
+  }
+}
+
+#####################
+# INTERNET GATEWAY
+#####################
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-  tags = { Name = "k8s-igw" }
-}
-
-resource "aws_subnet" "public" {
-  count = length(var.public_subnet_cidrs)
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidrs[count.index]
-  map_public_ip_on_launch = true
 
   tags = {
-    Name = "public-${count.index}"
+    Name = "k8s-igw"
   }
 }
 
-resource "aws_subnet" "private" {
-  count = length(var.private_subnet_cidrs)
-  vpc_id     = aws_vpc.main.id
-  cidr_block = var.private_subnet_cidrs[count.index]
+#####################
+# NAT GATEWAY
+#####################
 
-  tags = {
-    Name = "private-${count.index}"
-  }
+# Elastic IP for NAT
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
 }
 
-resource "aws_route_table" "public" {
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public_subnet.id
+
+  tags = {
+    Name = "k8s-nat-gateway"
+  }
+
+  depends_on = [aws_internet_gateway.igw]
+}
+
+#####################
+# ROUTE TABLE - PUBLIC
+#####################
+
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -37,11 +86,34 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
-  tags = { Name = "public-rt" }
+  tags = {
+    Name = "k8s-public-rt"
+  }
 }
 
 resource "aws_route_table_association" "public_assoc" {
-  count          = length(aws_subnet.public)
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+#####################
+# ROUTE TABLE - PRIVATE
+#####################
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "k8s-private-rt"
+  }
+}
+
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private_rt.id
 }

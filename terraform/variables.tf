@@ -1,42 +1,16 @@
-variable "aws_region" {
-  type    = string
+variable "region" {
   default = "ap-south-1"
 }
 
-variable "vpc_cidr" {
-  type    = string
-  default = "10.0.0.0/16"
-}
-
-variable "public_subnet_cidrs" {
-  type    = list(string)
-  default = ["10.0.1.0/24", "10.0.2.0/24"]
-}
-
-variable "private_subnet_cidrs" {
-  type    = list(string)
-  default = ["10.0.101.0/24", "10.0.102.0/24"]
-}
-
-variable "key_name" {
-  type = string
-}
-
-variable "public_key_path" {
-  type = string
+variable "ami" {
+  description = "Ubuntu 22.04 AMI"
+  default     = "ami-02b8269d5e85954ef"
 }
 
 variable "instance_type" {
-  type    = string
-  default = "t3.medium"
+  default = "c7i-flex.large"
 }
 
-variable "workers_count" {
-  type    = number
-  default = 3
-}
-
-variable "ssh_allowed_cidr" {
-  type    = string
-  default = "0.0.0.0/0"
+variable "key_name" {
+  description = "Your SSH key in AWS"
 }
