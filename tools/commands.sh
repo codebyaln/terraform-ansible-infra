@@ -7,6 +7,7 @@ sudo chmod -R 755 .
 rm -rf .terraform
 terraform init
 
+# Import key to local machine
 terraform import aws_key_pair.main baas-exp
 
 # resource "aws_key_pair" "main" {
@@ -41,3 +42,7 @@ terraform init -migrate-state
 terraform output -json > ../ansible/terraform-outputs.json
 
 terraform output -json > tfout.json
+
+
+ansible-playbook playbook.yml
+

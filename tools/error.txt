@@ -1,0 +1,20 @@
+
+1.
+terraform init
+Initializing the backend...
+╷
+│ Error: Failed to get existing workspaces: Unable to list objects in S3 bucket "terraform-state-bucket" with prefix "env:/": operation error S3: ListObjectsV2, https response error StatusCode: 301, RequestID: Y5KZB2X0HMYYHMDT, HostID: rOZjF8pLxmWhRpztPK64eKvxcgN49fl7ejNDIwMJjR45+eft7gtkFQBOhuNooRDqGS596/2+A2A=, requested bucket from "ap-south-1", actual location "us-east-1"
+│
+│
+
+issue in the file backend.tf  
+
+2. 
+terraform plan
+╷
+│ Error: Reference to undeclared resource
+│
+│   on outputs.tf line 22, in output "ssh_key_name":
+│   22:   value = aws_key_pair.main.key_name
+│
+│ A managed resource "aws_key_pair" "main" has not been declared in the root module.
