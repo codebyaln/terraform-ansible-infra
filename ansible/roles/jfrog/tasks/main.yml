@@ -1,0 +1,24 @@
+- name: Install Java 17
+  apt:
+    name: openjdk-17-jdk
+    state: present
+    update_cache: yes
+
+- name: Download Artifactory OSS deb if not present
+  get_url:
+    url: "https://releases.jfrog.io/artifactory/artifactory-debs/pool/jf/jfrog-artifactory-oss/jfrog-artifactory-oss-7.77.9.deb"
+    dest: /tmp/artifactory.deb
+    mode: '0644'
+  register: art_deb
+  ignore_errors: true
+
+- name: Install artifactory package
+  apt:
+    deb: /tmp/artifactory.deb
+  when: art_deb is succeeded or art_deb.changed
+
+- name: Ensure artifactory running
+  service:
+    name: artifactory
+    state: started
+    enabled: yes

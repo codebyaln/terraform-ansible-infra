@@ -1,0 +1,4 @@
+- hosts: jfrog
+  become: yes
+  roles:
+  - jfrog

@@ -28,7 +28,22 @@ variable "public_key_path" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "t4g.small"
+}
+
+variable "bastion_instance_type" {
+  type    = string
+  default = "t4g.small"
+}
+
+variable "jfrog_instance_type" {
+  type    = string
+  default = "t4g.small"
+}
+
+variable "gitlab_runner_instance_type" {
+  type    = string
+  default = "t4g.small"
 }
 
 variable "workers_count" {
