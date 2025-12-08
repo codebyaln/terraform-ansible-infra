@@ -10,31 +10,31 @@ resource "aws_instance" "master" {
     Name = "k8s-master"
   }
 
-  provisioner "file" {
-    source      = "scripts/master.sh"
-    destination = "/tmp/master.sh"
+  # provisioner "file" {
+  #   source      = "scripts/master.sh"
+  #   destination = "/tmp/master.sh"
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
-      host        = self.public_ip
-    }
-  }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file("~/.ssh/id_rsa")
+  #     host        = self.public_ip
+  #   }
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/master.sh",
-      "sudo /tmp/master.sh"
-    ]
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/master.sh",
+  #     "sudo /tmp/master.sh"
+  #   ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
-      host        = self.public_ip
-    }
-  }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file("~/.ssh/id_rsa")
+  #     host        = self.public_ip
+  #   }
+  # }
 }
 
 resource "aws_instance" "workers" {
@@ -49,29 +49,29 @@ resource "aws_instance" "workers" {
     Name = "k8s-worker-${count.index + 1}"
   }
 
-  provisioner "file" {
-    source      = "scripts/worker.sh"
-    destination = "/tmp/worker.sh"
+  # provisioner "file" {
+  #   source      = "scripts/worker.sh"
+  #   destination = "/tmp/worker.sh"
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
-      host        = self.public_ip
-    }
-  }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file("~/.ssh/id_rsa")
+  #     host        = self.public_ip
+  #   }
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/worker.sh",
-      "sudo /tmp/worker.sh"
-    ]
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/worker.sh",
+  #     "sudo /tmp/worker.sh"
+  #   ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
-      host        = self.public_ip
-    }
-  }
+  #   connection {
+  #     type        = "ssh"
+  #     user        = "ubuntu"
+  #     private_key = file("~/.ssh/id_rsa")
+  #     host        = self.public_ip
+  #   }
+  # }
 }
