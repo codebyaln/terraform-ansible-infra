@@ -14,3 +14,8 @@ variable "instance_type" {
 variable "key_name" {
   description = "Your SSH key in AWS"
 }
+
+variable "workers_count" {
+  description = "Node count for kubernetes cluster"
+  default = 2
+}
