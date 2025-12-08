@@ -10,7 +10,7 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "bastion" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = var.bastion_instance_type
+  instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public_subnet.id
   associate_public_ip_address = true
   key_name                    = var.key_name
