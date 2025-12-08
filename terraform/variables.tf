@@ -19,3 +19,8 @@ variable "workers_count" {
   description = "Node count for kubernetes cluster"
   default = 2
 }
+
+variable "bastion_instance_type" {
+  default = "t4g.small"
+  description = "t4g.small 2GB"
+}
