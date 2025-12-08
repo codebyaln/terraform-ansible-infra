@@ -32,6 +32,33 @@ resource "aws_instance" "master" {
   # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   tags = { Name = "k8s-master" }
+
+  provisioner "file" {
+    source      = "scripts/master.sh"
+    destination = "/tmp/master.sh"
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file("/home/ubuntu/kube.pem")
+      host        = self.public_ip
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/master.sh",
+      "sudo /tmp/master.sh"
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file("~/.ssh/id_rsa")
+      host        = self.public_ip
+    }
+  }
+
 }
 
 # Worker Node
