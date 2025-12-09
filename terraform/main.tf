@@ -105,7 +105,7 @@ resource "aws_instance" "workers" {
     type        = "ssh"
     user        = "ubuntu"
     private_key = tls_private_key.kube.private_key_pem
-    host        = self.private_ip
+    host        = self.public_ip
   }
 
   provisioner "file" {
