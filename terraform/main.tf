@@ -125,8 +125,11 @@ resource "aws_instance" "workers" {
   provisioner "remote-exec" {
     inline = [
       "sudo chmod +x /tmp/common.sh ",
+      "sudo chmod +x /tmp/kube.pem ",
+      
       "sudo /tmp/common.sh",
       "scp -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/join.sh /tmp/",
+      
       "sudo chmod +x /tmp/join.sh ",
       "sudo /tmp/join.sh",
     ]
