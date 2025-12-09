@@ -47,7 +47,7 @@ resource "aws_instance" "master" {
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/master.sh",
+      "sudo chmod +x /tmp/all-nodes.sh",
       "sudo /tmp/master.sh"
     ]
 
