@@ -1,28 +1,28 @@
 #!/bin/bash
-set -e
+# set -e
 
-# Disable swap
-swapoff -a
-sed -i '/swap/d' /etc/fstab
+# # Disable swap
+# swapoff -a
+# sed -i '/swap/d' /etc/fstab
 
-# Install dependencies
-apt-get update -y
-apt-get install -y apt-transport-https ca-certificates curl
+# # Install dependencies
+# apt-get update -y
+# apt-get install -y apt-transport-https ca-certificates curl
 
-# Install containerd
-apt-get install -y containerd
-mkdir -p /etc/containerd
-containerd config default > /etc/containerd/config.toml
-systemctl restart containerd
+# # Install containerd
+# apt-get install -y containerd
+# mkdir -p /etc/containerd
+# containerd config default > /etc/containerd/config.toml
+# systemctl restart containerd
 
-# Install Kubernetes
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" \
-  > /etc/apt/sources.list.d/kubernetes.list
+# # Install Kubernetes
+# curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+# echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" \
+#   > /etc/apt/sources.list.d/kubernetes.list
 
-apt-get update
-apt-get install -y kubelet kubeadm kubectl
-apt-mark hold kubelet kubeadm kubectl
+# apt-get update
+# apt-get install -y kubelet kubeadm kubectl
+# apt-mark hold kubelet kubeadm kubectl
 
 # Initialize cluster
 kubeadm init --pod-network-cidr=10.244.0.0/16

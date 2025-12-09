@@ -1,3 +1,28 @@
+
+resource "tls_private_key" "kube" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "kube" {
+  key_name   = "kube-auto-key"
+  public_key = tls_private_key.kube.public_key_openssh
+}
+
+# Save private key locally
+resource "local_file" "kube_private_key" {
+  content         = tls_private_key.kube.private_key_pem
+  filename        = "${path.module}/kube.pem"
+  file_permission = "0400"
+}
+
+# Save public key locally
+resource "local_file" "kube_public_key" {
+  content  = tls_private_key.kube.public_key_openssh
+  filename = "${path.module}/kube.pub"
+}
+
+
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -27,49 +52,77 @@ resource "aws_instance" "master" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_subnet.id
-  key_name               = var.key_name
+  # key_name               = var.key_name
+  key_name               = aws_key_pair.kube.key_name
   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
   # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   tags = { Name = "k8s-master" }
 
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = tls_private_key.kube.private_key_pem
+    host        = self.public_ip
+  }
+
   provisioner "file" {
-    source      = "scripts/master.sh"
+    source      = "scripts/k8s-master-node.sh"
     destination = "/tmp/master.sh"
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("/home/ubuntu/kube.pem")
-      host        = self.public_ip
-    }
+    # connection {
+    #   type        = "ssh"
+    #   user        = "ubuntu"
+    #   private_key = file("/home/ubuntu/kube.pem")
+    #   host        = self.public_ip
+    # }
+  }
+
+  provisioner "file" {
+    source      = "scripts/k8s-all-nodes.sh"
+    destination = "/tmp/common.sh"
+
+    # connection {
+    #   type        = "ssh"
+    #   user        = "ubuntu"
+    #   private_key = file("/home/ubuntu/kube.pem")
+    #   host        = self.public_ip
+    # }
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo chmod +x /tmp/all-nodes.sh",
+      "sudo chmod +x /tmp/common.sh ",
+      "sudo /tmp/common.sh",
+      "sudo chmod +x /tmp/master.sh ",
       "sudo /tmp/master.sh"
     ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
-      host        = self.public_ip
-    }
+    # connection {
+    #   type        = "ssh"
+    #   user        = "ubuntu"
+    #   private_key = file("~/.ssh/id_rsa")
+    #   host        = self.public_ip
+    # }
   }
 
 }
 
 # Worker Node
-resource "aws_instance" "workers" {
-  count                  = var.workers_count
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.private_subnet.id
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k8s_sg.id]
-  # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+# resource "aws_instance" "workers" {
+#   count                  = var.workers_count
+#   ami                    = data.aws_ami.ubuntu.id
+#   instance_type          = var.instance_type
+#   subnet_id              = aws_subnet.private_subnet.id
+#   key_name               = var.key_name
+#   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
+#   # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
-  tags = { Name = "k8s-worker-${count.index + 1}" }
-}
+#   tags = { Name = "k8s-worker-${count.index + 1}" }
+
+
+#   depends_on = [aws_instance.master]
+
+
+
+# }
