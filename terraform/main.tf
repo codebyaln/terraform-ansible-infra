@@ -144,8 +144,9 @@ resource "aws_instance" "workers" {
   provisioner "remote-exec" {
     inline = [
       "chmod 600 /tmp/kube.pem /tmp/common.sh",
-      "JOIN_CMD=$(ssh -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip} 'cat /tmp/kubeadm-join')",
-      "sudo bash -c \"$JOIN_CMD\""
+      "sudo /tmp/common.sh",
+      # "JOIN_CMD=$(ssh -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip} 'cat /tmp/kubeadm-join')",
+      # "sudo bash -c \"$JOIN_CMD\""
     ]
   }
 
