@@ -12,8 +12,8 @@ sudo chown "$(id -u)":"$(id -g)" "$HOME"/.kube/config
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/calico.yaml
 
 # Generate Join Command
-# kubeadm token create --print-join-command > /home/ubuntu/join.sh
-# sudo chmod +x /home/ubuntu/join.sh
+sudo kubeadm token create --print-join-command > /home/ubuntu/join.sh
+sudo chmod +x /home/ubuntu/join.sh
 
-sudo kubeadm token create --print-join-command --ttl 0 --cri-socket \"unix:///run/containerd/containerd.sock\" > /tmp/kubeadm-join
-sudo chmod 644 /tmp/kubeadm-join
+# sudo kubeadm token create --print-join-command --ttl 0 --cri-socket \"unix:///run/containerd/containerd.sock\" > /tmp/kubeadm-join
+# sudo chmod 644 /tmp/kubeadm-join

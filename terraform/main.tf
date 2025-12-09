@@ -108,47 +108,55 @@ resource "aws_instance" "master" {
 
 }
 
-# Worker Node
-resource "aws_instance" "workers" {
-  count                  = var.workers_count
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.private_subnet.id
-  # key_name               = var.key_name
-  key_name               = aws_key_pair.kube.key_name
-  vpc_security_group_ids = [aws_security_group.k8s_sg.id]
-  # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+# # Worker Node
+# resource "aws_instance" "workers" {
+#   count                  = var.workers_count
+#   ami                    = data.aws_ami.ubuntu.id
+#   instance_type          = var.instance_type
+#   subnet_id              = aws_subnet.private_subnet.id
+#   # key_name               = var.key_name
+#   key_name               = aws_key_pair.kube.key_name
+#   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
+#   # iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
-  tags = { Name = "k8s-worker-${count.index + 1}" }
-
-
-  depends_on = [aws_instance.master]
-
-   connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = tls_private_key.kube.private_key_pem
-    host        = self.private_ip
-  }
-
-  provisioner "file" {
-    source      = "scripts/k8s-worker-node.sh"
-    destination = "/tmp/worker.sh"
-  }
-
-  provisioner "file" {
-    source      = "scripts/k8s-all-nodes.sh"
-    destination = "/tmp/common.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod 600 /tmp/kube.pem /tmp/common.sh",
-      "sudo /tmp/common.sh",
-      # "JOIN_CMD=$(ssh -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip} 'cat /tmp/kubeadm-join')",
-      # "sudo bash -c \"$JOIN_CMD\""
-    ]
-  }
+#   tags = { Name = "k8s-worker-${count.index + 1}" }
 
 
-}
+#   depends_on = [aws_instance.master]
+
+#    connection {
+#     type        = "ssh"
+#     user        = "ubuntu"
+#     private_key = tls_private_key.kube.private_key_pem
+#     host        = self.private_ip
+#   }
+
+#   provisioner "file" {
+#     source      = "scripts/k8s-worker-node.sh"
+#     destination = "/tmp/worker.sh"
+#   }
+
+#   provisioner "file" {
+#     source      = "scripts/k8s-all-nodes.sh"
+#     destination = "/tmp/common.sh"
+#   }
+
+#   # Transfer kube.pem (generated key)
+#   provisioner "file" {
+#     content     = tls_private_key.kube.private_key_pem
+#     destination = "/tmp/kube.pem"
+#   }
+
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo chmod +x /tmp/common.sh",
+#       "sudo /tmp/common.sh",
+#       "scp -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/join.sh /tmp/",
+      
+#       # "JOIN_CMD=$(ssh -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip} 'cat /tmp/kubeadm-join')",
+#       # "sudo bash -c \"$JOIN_CMD\""
+#     ]
+#   }
+
+
+# }
