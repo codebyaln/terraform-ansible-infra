@@ -56,6 +56,7 @@ resource "aws_instance" "master" {
   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
 
   tags = { Name = "k8s-master" }
+  depends_on = [aws_instance.workers]
 
   connection {
     type        = "ssh"
@@ -98,7 +99,7 @@ resource "aws_instance" "workers" {
 
   tags = { Name = "k8s-worker-${count.index + 1}" }
 
-  depends_on = [aws_instance.master]
+  # depends_on = [aws_instance.master]
 
   connection {
     type        = "ssh"
