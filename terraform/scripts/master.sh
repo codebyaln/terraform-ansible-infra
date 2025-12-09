@@ -36,5 +36,11 @@ chown ubuntu:ubuntu /home/ubuntu/.kube/config
 su - ubuntu -c "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
 
 # Generate join command
-kubeadm token create --print-join-command > /home/ubuntu/join.sh
+# kubeadm token create --print-join-command > /home/ubuntu/join.sh
+# chmod +x /home/ubuntu/join.sh
+
+JOIN_CMD=$(kubeadm token create --print-join-command)
+
+echo "sudo $JOIN_CMD --cri-socket \"unix:///run/containerd/containerd.sock\" --v=5" \
+  > /home/ubuntu/join.sh
 chmod +x /home/ubuntu/join.sh
