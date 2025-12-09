@@ -131,10 +131,10 @@ resource "aws_instance" "workers" {
     host        = self.private_ip
   }
 
-  provisioner "file" {
-    source      = "scripts/k8s-worker-node.sh"
-    destination = "/tmp/worker.sh"
-  }
+  # provisioner "file" {
+  #   source      = "scripts/k8s-worker-node.sh"
+  #   destination = "/tmp/worker.sh"
+  # }
 
   provisioner "file" {
     source      = "scripts/k8s-all-nodes.sh"
@@ -149,10 +149,10 @@ resource "aws_instance" "workers" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo chmod +x /tmp/common.sh",
-      "sudo /tmp/common.sh",
+      # "sudo chmod +x /tmp/common.sh",
+      # "sudo /tmp/common.sh",
       "scp -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/join.sh /tmp/",
-      
+
       
       # "JOIN_CMD=$(ssh -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip} 'cat /tmp/kubeadm-join')",
       # "sudo bash -c \"$JOIN_CMD\""
