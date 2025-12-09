@@ -56,33 +56,32 @@ resource "aws_instance" "master" {
   vpc_security_group_ids = [aws_security_group.k8s_sg.id]
 
   tags = { Name = "k8s-master" }
-  # depends_on = [aws_instance.workers]
 
-  # connection {
-  #   type        = "ssh"
-  #   user        = "ubuntu"
-  #   private_key = tls_private_key.kube.private_key_pem
-  #   host        = self.public_ip
-  # }
+  connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = tls_private_key.kube.private_key_pem
+    host        = self.public_ip
+  }
 
-  # provisioner "file" {
-  #   source      = "scripts/k8s-master-node.sh"
-  #   destination = "/tmp/master.sh"
-  # }
+  provisioner "file" {
+    source      = "scripts/k8s-master-node.sh"
+    destination = "/tmp/master.sh"
+  }
 
-  # provisioner "file" {
-  #   source      = "scripts/k8s-all-nodes.sh"
-  #   destination = "/tmp/common.sh"
-  # }
+  provisioner "file" {
+    source      = "scripts/k8s-all-nodes.sh"
+    destination = "/tmp/common.sh"
+  }
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "sudo chmod +x /tmp/common.sh ",
-  #     "sudo /tmp/common.sh",
-  #     "sudo chmod +x /tmp/master.sh ",
-  #     "sudo /tmp/master.sh"
-  #   ]
-  # }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod +x /tmp/common.sh ",
+      "sudo /tmp/common.sh",
+      "sudo chmod +x /tmp/master.sh ",
+      "sudo /tmp/master.sh"
+    ]
+  }
 
 }
 
@@ -99,7 +98,7 @@ resource "aws_instance" "workers" {
 
   tags = { Name = "k8s-worker-${count.index + 1}" }
 
-  # depends_on = [aws_instance.master]
+  depends_on = [aws_instance.master]
 
   connection {
     type        = "ssh"
@@ -114,6 +113,11 @@ resource "aws_instance" "workers" {
   }
 
   provisioner "file" {
+    source      = "scripts/k8s-worker.sh"
+    destination = "/tmp/worker.sh"
+  }
+
+  provisioner "file" {
     content     = tls_private_key.kube.private_key_pem
     destination = "/tmp/kube.pem"
   }
@@ -122,7 +126,9 @@ resource "aws_instance" "workers" {
     inline = [
       "sudo chmod +x /tmp/common.sh ",
       "sudo /tmp/common.sh",
-      # "scp -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/join.sh /tmp/"
+      "scp -o StrictHostKeyChecking=no -i /tmp/kube.pem ubuntu@${aws_instance.master.private_ip}:/home/ubuntu/join.sh /tmp/",
+      "sudo chmod +x /tmp/join.sh ",
+      "sudo /tmp/join.sh",
     ]
   }
 
