@@ -113,7 +113,7 @@ resource "aws_instance" "workers" {
   }
 
   provisioner "file" {
-    source      = "scripts/k8s-worker.sh"
+    source      = "scripts/k8s-worker-node.sh"
     destination = "/tmp/worker.sh"
   }
 
